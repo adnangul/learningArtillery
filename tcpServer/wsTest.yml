@@ -1,0 +1,11 @@
+config:
+  target: "wss://127.0.0.1:9986"
+  phases:
+    - duration: 5
+      arrivalRate: 1
+scenarios:
+    - engine: "ws"
+      flow:
+        - send: "hello"
+        - think: 1
+        - send: "Bad data"

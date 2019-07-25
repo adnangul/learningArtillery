@@ -1,0 +1,41 @@
+## run 
+## artillery run testServiceHealth.yml
+## artillery run -e production testServiceHealth.yml
+##
+config:
+  target: http://localhost:7071
+#  tls:  ## to disable certificate avoid rejection of self signed cert etc
+#    rejectUnauthorized: false
+
+  http:
+#    timeout: 10 ## Responses have to be sent within 10 seconds or the request will be aborted
+    pool: 10     ## All HTTP requests from all virtual users will be sent over the same 10 connections
+#    maxSockets: ##  By default Artillery creates one TCP connection per virtual user.
+
+
+  phases:
+    - duration: 10
+      arrivalRate: 5
+      name: "Warm up the application"
+    - duration: 20
+      arrivalRate: 2
+      name: "Sustained max load"
+  environments:
+    production:
+      target: "http://localhost.prod:7071"
+  variables:
+      postcode:
+        - "SE1"
+  ensure: 
+    p95: 200 ## will exit if latecy over 200
+    maxErrorRate: 1   ##exit with a non-zero if the total error rate exceeded 1%
+#  defaults:
+#    headers:
+#      x-api-key: "{{ $processEnvironment.SERVICE_API_KEY }}"
+scenarios:
+  - flow:
+#      - log: "Current environment is set to: {{ $environment }}"
+      - get:
+          url: "/api/health"
+      - name: "Perform health check"
+      

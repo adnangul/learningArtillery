@@ -1,0 +1,34 @@
+Install Artillery
+    > npm install -g artillery
+    note: you may need to run with sudo
+    
+    I came across permission error, and was able to move with below command
+    https://github.com/LucyBot-Inc/api-spec-converter/issues/132
+    
+    > sudo npm install -g artillery --unsafe-perm=true --allow-root
+    
+    We could have tried below, to udate
+    > sudo npm i -g npm to update
+    
+Check ver
+    > artillery -V
+    
+ you should see the version if installation successfull
+ 
+ To use XPath capture, install below
+    >npm install -g artillery-xml-capture
+ 
+ Quick Test
+ -----------
+ > artillery quick --count 10 -n 20 https://artillery.io/
+ 
+ 1. Perform another test hello.yml from this site
+ https://artillery.io/docs/getting-started/#install-nodejs
+ 
+ 
+ -----------
+ Copying using scp from local to remote
+ https://linuxize.com/post/how-to-use-scp-command-to-securely-transfer-files/
+ -----------------------------------
+ > sudo scp rlm_scenario_* sysadmin@172.30.51.245:/home/sysadmin/git
+ 
