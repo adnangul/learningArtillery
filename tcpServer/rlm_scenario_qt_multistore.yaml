@@ -1,0 +1,67 @@
+config:
+  target: 'http://localhost:3000'
+  tls:
+      rejectUnauthorized: false
+  payload:
+    path: ../data/LSList-{{ $environment }}-nonFuelSubUsers.csv
+    #path: ../data/users-local{{ $environment }}.csv
+    fields:
+      - basename
+      - email
+      - phone
+      - barcode
+      - loyaltyId
+    order: sequence
+    cast: false
+  defaults:
+    headers:
+      Content-Type: application/json
+      User-Agent: 'artillery 4.0.3 (https://artillery.io)'
+  phases:
+    - duration: 2
+      arrivalRate: 1
+  variables:
+    store:
+        - "123"
+        - "234"
+        - "345"
+        - "190"
+  #    varName: "7000880020000900576"
+  environments:
+    local:
+    #  target: 'http://localhost:3000'
+    preprod:
+    #  target: 'http://localhost:3000'
+
+    ## We don't need to have different env for preprod, we will be running the
+    ## the load test artillery script from same machine where we will run the NodeJs
+    ## server (sandbox) to act as proxy for sending load to ls listener. 
+    ## However, we need to ensure we have update the ip for lslistner in nodejs script
+scenarios:
+  - flow:
+      - log: 'AUTH with barcode: {{ barcode }}'
+      - post:
+          url: /sendRLM
+          json:
+            barcode: '{{ barcode }}'
+            mode: AUTH
+            store: '{{ store }}'
+            responseFromat: json  ## can bo quote '' same result
+          capture:
+              #json: "$.LoyaltyMessage"
+              #as: "LoyaltyMessage"  ## will capture who response
+              - json: "$.LoyaltyMessage.Operation[0].Status[0]"
+                as: "OperationStatus"
+              - json: "$.LoyaltyMessage.Header[0].ClientSequenceID[0]"  ## for capturing mutiple, will list as array
+                as: "clientSequenceID"
+      - log: '====AUTH request==== : SeqId: {{ clientSequenceID}} - Status: {{ OperationStatus }}'
+
+      - log: 'CAPTURE with barcode: {{ barcode }}'
+      - post:
+          url: /sendRLM
+          json:
+            barcode: '{{ barcode }}'
+            mode: CAPTURE
+          # capture:
+          #   xpath: "(//LoyaltyMessage)/Operation/Status/text()"
+          #   as: "status"

@@ -30,5 +30,5 @@ Check ver
  Copying using scp from local to remote
  https://linuxize.com/post/how-to-use-scp-command-to-securely-transfer-files/
  -----------------------------------
- > sudo scp rlm_scenario_* sysadmin@172.30.51.245:/home/sysadmin/git
+ > sudo scp rlm_scenario_* sysadmin@172.30.51.245:/home/sysadmin/git/
  
