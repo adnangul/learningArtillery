@@ -1,0 +1,35 @@
+## run 
+## artillery run name.yml
+## artillery run -e preprod name.yml
+##
+
+config:
+  target: 'https://m.preprod.racetracloyalty.com'
+  tls:
+      rejectUnauthorized: false
+  processor: ./functions.js
+  phases:
+    - duration: 1
+      arrivalRate: 1
+  defaults:
+    headers:
+      Content-Type: application/json
+  environments:
+    local:
+      target: 'http://localhost:7071'
+    preprod:
+      target: 'https://m.preprod.racetracloyalty.com'
+  variables:
+      token: ''
+scenarios:
+  - flow:
+    - log: 'getting member offers with before request'
+    - get:
+        beforeRequest: "beforeRequest"
+        url: "/api/getOffers"
+        capture:
+            #json: "$.memberOffers"
+            #as: "memberOffers"  ## will capture who response
+            - json: "$.status.message"
+              as: "message"
+    - log: '--- CAPTURE Response --- Message: {{ message}}'

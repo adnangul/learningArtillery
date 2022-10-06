@@ -1,0 +1,107 @@
+Ref: https://github.com/artilleryio/artillery/issues/245
+ 
+ config:
+  target: 'http://localhost:8081'
+  phases:
+    - duration: 100
+      arrivalRate: 10
+  defaults:
+    headers:
+      Content-Type: application/json
+
+scenarios:
+  - flow:
+    - get:
+        url: /health
+        headers:
+          Content-Type: application/json
+    - post:
+        url: /auth
+        body:  '{"username":"asdf", "password": "asdf"}'
+        headers:
+          Content-Type: application/json
+        capture:
+          json: '$.token'
+          as: token
+    - post:
+        url: /transaction
+        body:  '{"...."}'
+        headers:
+          Authorization: Bearer {{ token }}
+          Content-Type: application/json
+          
+          
+
+Another example, using Before request with json - can be utilized to construct yaml version
+    Ref: https://github.com/artilleryio/artillery/blob/master/test/core/scripts/before_test.json
+
+    {
+      "config": {
+          "target": "http://127.0.0.1:3003",
+          "phases": [
+            { "duration": 10, "arrivalRate": 1 }
+          ]
+      },
+      "before": {
+        "flow": [
+          {"post":
+            {
+              "url": "/pets",
+              "json": {"name": "MickeyTheDog", "species": "Dog"},
+              "capture": {
+                "json": "$.id",
+                "as": "petId"
+              }
+            }
+          }
+        ]
+      },
+      "scenarios": [
+        {
+          "name": "Get the same pet in every scenario, as the pet was created once before the test started. ",
+          "flow": [
+            {"get": {
+              "url": "/pets/{{ petId }}",
+              "match": {"json": "$.name", "value": "MickeyTheDog"}
+            }}
+          ]
+        }
+      ]
+    }
+    
+
+ Automating OAuth
+ ----------------
+ ref: https://stackoverflow.com/questions/58712212/how-to-automate-the-oauth-2-0-token-generation-using-artillery
+ https://artillery.io/blog/using-fakerjs-with-artillery
+ 
+     config:
+      target: "https://baseUrl.com"
+      phases:
+        - duration: 60
+          arrivalRate: 100
+      processor: "./customFile.js"
+
+    scenarios:
+      - flow:
+          - post:
+              url: "/pathInYourApi"
+              headers:
+                Content-Type: "application/json"
+                Accept: application/json
+              json: {}
+              beforeRequest: "beforeRequest"
+              
+
+ and then your customFile.js script:
+ 
+    module.exports = {
+      beforeRequest: beforeRequest,
+    };
+
+    function beforeRequest(requestParams, context, ee, next) {
+      // Call your OAuth client, and after you obtain token you can assign it to requestParams Authorization header
+      // eg. requestParams.headers.Authorization = `Bearer + ${token}`
+
+      return next(); // MUST be called for the scenario to continue
+    }
